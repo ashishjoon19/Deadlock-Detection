@@ -1,0 +1,264 @@
+### Test Cases
+
+**Test Case 1: Add Single Transaction**
+- **Steps**:
+  1. Start the application (clear state).
+  2. Click "Add Transaction".
+- **Expected Outcome**:
+  - Transaction table: Row with ID "T0", Status "Active", Held Locks "-", Waiting For "-".
+  - Log: "Added transaction T0".
+- **Testing Aspect**: Transaction addition.
+
+**Test Case 2: Add Single Data Item**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Data Item".
+- **Expected Outcome**:
+  - Data Item table: Row with ID "D0", Lock Holder "-".
+  - Log: "Added data item D0".
+- **Testing Aspect**: Data item addition.
+
+**Test Case 3: Request Lock on Free Data Item**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" (T0).
+  3. Click "Add Data Item" (D0).
+  4. Enter TID: 0, DID: 0.
+  5. Click "Request Lock".
+- **Expected Outcome**:
+  - Transaction table: T0’s Held Locks: "D0".
+  - Data Item table: D0’s Lock Holder: "T0".
+  - Log: "T0 granted lock on D0".
+- **Testing Aspect**: Lock request functionality.
+
+**Test Case 4: Release Lock**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" (T0).
+  3. Click "Add Data Item" (D0).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 0, DID: 0, click "Release Lock".
+- **Expected Outcome**:
+  - Transaction table: T0’s Held Locks: "-".
+  - Data Item table: D0’s Lock Holder: "-".
+  - Log: "T0 released lock on D0".
+- **Testing Aspect**: Lock release functionality.
+
+**Test Case 5: Invalid Input for Lock Request**
+- **Steps**:
+  1. Start the application.
+  2. Enter TID: "abc", DID: "xyz".
+  3. Click "Request Lock".
+- **Expected Outcome**:
+  - Log: "Invalid TID or DID".
+  - Tables unchanged.
+- **Testing Aspect**: Input validation.
+
+**Test Case 6: Simple Deadlock Detection**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" twice (D0, D1).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 1, click "Request Lock".
+  6. Enter TID: 1, DID: 0, click "Request Lock".
+  7. Enter TID: 0, DID: 1, click "Request Lock".
+  8. Click "Detect Deadlock".
+- **Expected Outcome**:
+  - Log: "Deadlock detected: T0 -> T1 -> T0".
+  - Graph: T0 → T1 and T1 → T0, one edge above, one below.
+- **Testing Aspect**: Deadlock detection and graph visualization.
+
+**Test Case 7: Recover from Deadlock**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" twice (D0, D1).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 1, click "Request Lock".
+  6. Enter TID: 1, DID: 0, click "Request Lock".
+  7. Enter TID: 0, DID: 1, click "Request Lock".
+  8. Click "Detect Deadlock".
+  9. Click "Recover".
+- **Expected Outcome**:
+  - Log: "Terminated T1 to break deadlock" (or T0).
+  - Transaction table: T1’s Status: "Terminated", Held Locks: "-".
+  - Data Item table: D1’s Lock Holder: "-".
+  - Graph: No edges involving T1.
+- **Testing Aspect**: Deadlock recovery.
+
+**Test Case 8: Three-Transaction Deadlock**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" three times (T0, T1, T2).
+  3. Click "Add Data Item" three times (D0, D1, D2).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 1, click "Request Lock".
+  6. Enter TID: 2, DID: 2, click "Request Lock".
+  7. Enter TID: 1, DID: 0, click "Request Lock".
+  8. Enter TID: 2, DID: 1, click "Request Lock".
+  9. Enter TID: 0, DID: 2, click "Request Lock".
+  10. Click "Detect Deadlock".
+- **Expected Outcome**:
+  - Log: "Deadlock detected: T0 -> T2 -> T1 -> T0".
+  - Graph: Cycle T0 → T2 → T1 → T0.
+- **Testing Aspect**: Complex deadlock detection.
+
+**Test Case 9: No Deadlock with Linear Dependency**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" three times (T0, T1, T2).
+  3. Click "Add Data Item" (D0).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 0, click "Request Lock".
+  6. Enter TID: 2, DID: 0, click "Request Lock".
+  7. Click "Detect Deadlock".
+- **Expected Outcome**:
+  - Log: "No deadlock detected".
+  - Graph: T1 → T0, T2 → T0 (no cycle).
+- **Testing Aspect**: Non-cyclic dependency handling.
+
+**Test Case 10: Single Data Item with Multiple Transactions**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" (D0).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 0, click "Request Lock".
+  6. Click "Detect Deadlock".
+- **Expected Outcome**:
+  - Log: "No deadlock detected".
+  - Graph: T1 → T0.
+- **Testing Aspect**: Single resource dependency.
+
+**Test Case 11: Deadlock Prevention Enabled**
+- **Steps**:
+  1. Start the application.
+  2. Check "Enable Prevention".
+  3. Click "Add Transaction" twice (T0, T1).
+  4. Click "Add Data Item" twice (D0, D1).
+  5. Enter TID: 0, DID: 1, click "Request Lock".
+  6. Enter TID: 1, DID: 0, click "Request Lock".
+  7. Enter TID: 1, DID: 1, click "Request Lock".
+- **Expected Outcome**:
+  - Log: "Prevention enabled", possibly "Terminated T1 to prevent deadlock".
+  - Transaction table: T1 may be "Terminated".
+  - Graph updates accordingly.
+- **Testing Aspect**: Deadlock prevention.
+
+**Test Case 12: Toggle Prevention Mechanism**
+- **Steps**:
+  1. Start the application.
+  2. Check "Enable Prevention".
+  3. Uncheck "Enable Prevention".
+  4. Click "Add Transaction" twice (T0, T1).
+  5. Click "Add Data Item" twice (D0, D1).
+  6. Enter TID: 0, DID: 0, click "Request Lock".
+  7. Enter TID: 1, DID: 1, click "Request Lock".
+  8. Enter TID: 1, DID: 0, click "Request Lock".
+  9. Enter TID: 0, DID: 1, click "Request Lock".
+  10. Click "Detect Deadlock".
+- **Expected Outcome**:
+  - Log: "Prevention enabled", "Prevention disabled", "Deadlock detected: T0 -> T1 -> T0".
+  - Graph: T0 → T1, T1 → T0.
+- **Testing Aspect**: Prevention toggling.
+
+**Test Case 13: Prevention with Three Transactions**
+- **Steps**:
+  1. Start the application.
+  2. Check "Enable Prevention".
+  3. Click "Add Transaction" three times (T0, T1, T2).
+  4. Click "Add Data Item" three times (D0, D1, D2).
+  5. Enter TID: 0, DID: 2, click "Request Lock".
+  6. Enter TID: 1, DID: 0, click "Request Lock".
+  7. Enter TID: 2, DID: 1, click "Request Lock".
+  8. Enter TID: 2, DID: 0, click "Request Lock".
+- **Expected Outcome**:
+  - Log: "Prevention enabled", may include "Terminated T2 to prevent deadlock".
+  - Transaction table: T2 may be "Terminated".
+- **Testing Aspect**: Prevention in complex scenarios.
+
+**Test Case 14: Bidirectional Edges in Graph**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" twice (D0, D1).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 1, click "Request Lock".
+  6. Enter TID: 1, DID: 0, click "Request Lock".
+  7. Enter TID: 0, DID: 1, click "Request Lock".
+- **Expected Outcome**:
+  - Graph: T0 → T1 (curves above), T1 → T0 (curves below), edges thick with arrows.
+- **Testing Aspect**: Graph visualization (bidirectional edges).
+
+**Test Case 15: Graph with No Edges**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" twice (D0, D1).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 1, click "Request Lock".
+- **Expected Outcome**:
+  - Graph: T0 and T1 nodes, no edges.
+- **Testing Aspect**: Graph rendering with no dependencies.
+
+**Test Case 16: Multiple Edges to One Node in Graph**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" three times (T0, T1, T2).
+  3. Click "Add Data Item" (D0).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 0, click "Request Lock".
+  6. Enter TID: 2, DID: 0, click "Request Lock".
+- **Expected Outcome**:
+  - Graph: T1 → T0, T2 → T0, edges slightly curved, not overlapping.
+- **Testing Aspect**: Graph with multiple edges to a node.
+
+**Test Case 17: Full-Screen Graph View**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" twice (D0, D1).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 0, click "Request Lock".
+  6. Click "View Graph Full Screen".
+- **Expected Outcome**:
+  - Full-screen dialog opens, graph shows T1 → T0, thick line with arrow.
+- **Testing Aspect**: Full-screen graph view.
+
+**Test Case 18: Empty State Detection**
+- **Steps**:
+  1. Start the application.
+  2. Click "Detect Deadlock".
+- **Expected Outcome**:
+  - Log: "No deadlock detected".
+  - Graph: Empty.
+- **Testing Aspect**: Empty state handling.
+
+**Test Case 19: Large-Scale Scenario (10 Transactions)**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" 10 times (T0 to T9).
+  3. Click "Add Data Item" 5 times (D0 to D4).
+  4. Request locks: TID: 0, DID: 0; TID: 1, DID: 1; TID: 2, DID: 0; TID: 3, DID: 1.
+- **Expected Outcome**:
+  - Graph: Scales dynamically, shows T2 → T0, T3 → T1, etc.
+  - GUI remains responsive.
+- **Testing Aspect**: Scalability.
+
+**Test Case 20: Lock Request After Recovery**
+- **Steps**:
+  1. Start the application.
+  2. Click "Add Transaction" twice (T0, T1).
+  3. Click "Add Data Item" twice (D0, D1).
+  4. Enter TID: 0, DID: 0, click "Request Lock".
+  5. Enter TID: 1, DID: 1, click "Request Lock".
+  6. Enter TID: 1, DID: 0, click "Request Lock".
+  7. Enter TID: 0, DID: 1, click "Request Lock".
+  8. Click "Detect Deadlock".
+  9. Click "Recover" (terminates T1).
+  10. Enter TID: 1, DID: 0, click "Request Lock".
+- **Expected Outcome**:
+  - Log: "T1 is terminated, cannot request lock".
+  - Tables/graph unchanged for T1.
+- **Testing Aspect**: Operations on terminated transactions.
