@@ -47,7 +47,7 @@ Clone the Repository:
 Open a terminal or command prompt.
 Run the following command, replacing [REPOSITORY_URL] with the URL of your repository (e.g., from GitHub, GitLab, or Bitbucket):git clone [REPOSITORY_URL]
 
-Example:git clone https://github.com/yourusername/deadlock-handling.git
+Example:git clone https://github.com/ashishjoon19/DeadlockGuard.git
 
 
 This will create a directory named after the repository (e.g., deadlock-handling) containing all project files.
@@ -55,7 +55,7 @@ This will create a directory named after the repository (e.g., deadlock-handling
 
 Navigate to the Project Directory:
 
-Change into the project directory:cd deadlock-handling
+Change into the project directory:cd Deadlock-Guard
 
 
 
